@@ -65,14 +65,12 @@ export default function NewEmployeePage() {
 
         if (createError) {
           console.error('Company creation error:', createError)
-          alert('DATABASE ERROR: ' + createError.message)
-          throw new Error('Failed to create company profile: ' + createError.message)
+          throw new Error('Failed to create company profile. Please check if you ran the SQL script in Supabase.')
         }
         company = newCompany
       }
 
       if (!company) {
-        alert('CRITICAL: Company profile still missing after creation attempt.')
         throw new Error('Still unable to load or create your company profile.')
       }
 
