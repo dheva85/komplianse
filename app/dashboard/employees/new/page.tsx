@@ -65,13 +65,15 @@ export default function NewEmployeePage() {
 
         if (createError) {
           console.error('Company creation error:', createError)
-          throw new Error('Failed to create company profile. Please check if you ran the SQL script in Supabase.')
+          alert('DATABASE ERROR: ' + createError.message)
+          throw new Error('Failed to create company profile: ' + createError.message)
         }
         company = newCompany
       }
 
       if (!company) {
-        throw new Error('Still unable to load or create your company profile. Please refresh and try again.')
+        alert('CRITICAL: Company profile still missing after creation attempt.')
+        throw new Error('Still unable to load or create your company profile.')
       }
 
       const { data: employee, error: employeeError } = await supabase
