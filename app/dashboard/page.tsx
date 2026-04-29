@@ -32,11 +32,25 @@ export default function DashboardPage() {
       setUser(user)
 
       if (user) {
-        const { data: company } = await supabase
+        let { data: company } = await supabase
           .from('companies')
           .select('id, company_name')
           .eq('owner_user_id', user.id)
           .single()
+
+        // Self-healing: If no company exists, create one
+        if (!company) {
+          const { data: newCompany } = await supabase
+            .from('companies')
+            .insert({
+              owner_user_id: user.id,
+              company_name: 'My Company',
+              owner_name: user.user_metadata?.owner_name || 'Owner',
+            })
+            .select()
+            .single()
+          company = newCompany
+        }
 
         const companyId = company?.id ?? null
 
