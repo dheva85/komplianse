@@ -32,11 +32,12 @@ export default function DashboardPage() {
       setUser(user)
 
       if (user) {
+        // Use maybeSingle() for safer loading
         let { data: company } = await supabase
           .from('companies')
           .select('id, company_name')
           .eq('owner_user_id', user.id)
-          .single()
+          .maybeSingle()
 
         // Self-healing: If no company exists, create one
         if (!company) {
@@ -48,7 +49,7 @@ export default function DashboardPage() {
               owner_name: user.user_metadata?.owner_name || 'Owner',
             })
             .select()
-            .single()
+            .maybeSingle()
           company = newCompany
         }
 

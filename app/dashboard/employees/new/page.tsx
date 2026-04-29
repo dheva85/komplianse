@@ -43,26 +43,35 @@ export default function NewEmployeePage() {
         throw new Error('Could not verify your session. Please log in again.')
       }
 
-      let { data: company, error: companyError } = await supabase
+      // Use maybeSingle() to avoid errors if the profile is missing
+      let { data: company } = await supabase
         .from('companies')
         .select('id')
         .eq('owner_user_id', authData.user.id)
-        .single()
+        .maybeSingle()
 
       // Self-healing: If no company exists, create one automatically
       if (!company) {
+        console.log('No company found for user, creating one...')
         const { data: newCompany, error: createError } = await supabase
           .from('companies')
           .insert({
             owner_user_id: authData.user.id,
-            company_name: 'My Company', // Default name
+            company_name: 'My Company',
             owner_name: authData.user.user_metadata?.owner_name || 'Owner',
           })
           .select()
-          .single()
+          .maybeSingle()
 
-        if (createError) throw new Error('Failed to create company profile: ' + createError.message)
+        if (createError) {
+          console.error('Company creation error:', createError)
+          throw new Error('Failed to create company profile. Please check if you ran the SQL script in Supabase.')
+        }
         company = newCompany
+      }
+
+      if (!company) {
+        throw new Error('Still unable to load or create your company profile. Please refresh and try again.')
       }
 
       const { data: employee, error: employeeError } = await supabase
